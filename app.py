@@ -36,7 +36,7 @@ def predict():
 
     # ['Task_Type', 'Brand', 'Account', 'Subject', 'Unit', 'Language_Pair', 'Tool', 'Rs_Plan',
     #          'unified_task_amount', 'DateStamp_base_2022', 'Duration', 'RS_Month', 'RS_M_Day', 'Hour']
-    label_encoder = preprocessing.LabelEncoder()
+    le = preprocessing.LabelEncoder()
 
     Task_Type = request.form.get("Task_Type")
     Brand = request.form.get("Brand")
@@ -52,20 +52,38 @@ def predict():
     rs_m_day = request.form.get('rs_m_day')
     hour = request.form.get('hour')
 
-    y = np.array([[label_encoder.fit_transform([Task_Type]).shape[0], label_encoder.fit_transform([Brand]).shape[0],
-                   label_encoder.fit_transform([Subject]).shape[0],
-                   label_encoder.fit_transform([Unit]).shape[0], label_encoder.fit_transform([Language_Pair]).shape[0],
-                   label_encoder.fit_transform([Tool]).shape[0], label_encoder.fit_transform([Rs_Plan]).shape[0],
-                   unified_task_amount, dateStamp_base, duration, rs_month, rs_m_day, hour]])
-    data = pickeld_model.predict(y[:1])
-    prob = pickeld_model.predict_proba(y[:1])
+    X_COLUMS = ['Task_Type', 'Brand', 'Subject', 'Unit', 'Language_Pair', 'Tool', 'Rs_Plan',
+                'unified_task_amount', 'DateStamp_base_2022', 'Duration', 'RS_Month', 'RS_M_Day', 'Hour']
+    X_test = np.array([[le.fit_transform([Task_Type]).shape[0], le.fit_transform([Brand]).shape[0],
+                        le.fit_transform([Subject]).shape[0],
+                        le.fit_transform([Unit]).shape[0], le.fit_transform([Language_Pair]).shape[0],
+                        le.fit_transform([Tool]).shape[0], le.fit_transform([Rs_Plan]).shape[0],
+                        unified_task_amount, dateStamp_base, duration, rs_month, rs_m_day, hour]])
 
-    if data == 1:
+    y_pred = pickeld_model.predict(X_test)
+    print("Prediction>>>>>>", y_pred)
+
+    score = pickeld_model.score(X_test, y_pred)
+
+    # PERCENTAGE DATA SUCCESS
+    percentage = pickeld_model.predict_proba(X_test[:1])
+    print("Percentage>>>>>>", percentage)
+
+    # IMPORTANCE COLUMN
+    Importance = pickeld_model.feature_importances_
+
+    columns = X_COLUMS[0]
+
+    if y_pred == 1:
         result = 'Success'
     else:
         result = 'Failed'
 
-    return render_template('index.html', prediction_text='task will be: ' + result)
+    return render_template('index.html',
+                           prediction_text='Task will be: ' + result + ' for brand ' +
+                                           Brand + '  Fail Percentage : ' + (
+                                                   f"{round(percentage[0][0] * 100, 2)}%" + '  Success Percentage: ' + (
+                                               f"{round(percentage[0][1] * 100, 2)}%")))
 
 
 # Train Modle and Save In DB
@@ -239,7 +257,7 @@ def predict_api():
     Rs_Plan = request_data["Rs_Plan"]
     Tool = request_data["Tool"]
 
-    X_COLUMS = ['Task_Type', 'Brand', 'Account', 'Subject', 'Unit', 'Language_Pair', 'Tool', 'Rs_Plan',
+    X_COLUMS = ['Task_Type', 'Brand', 'Subject', 'Unit', 'Language_Pair', 'Tool', 'Rs_Plan',
                 'unified_task_amount', 'DateStamp_base_2022', 'Duration', 'RS_Month', 'RS_M_Day', 'Hour']
     X_test = np.array([[le.fit_transform([Task_Type]).shape[0], le.fit_transform([Brand]).shape[0],
                         le.fit_transform([Subject]).shape[0],
