@@ -6,3 +6,5 @@ gunicorn
 joblib
 pandas
 mysql
+flask_validator
+wtforms

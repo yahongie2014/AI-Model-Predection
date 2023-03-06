@@ -1,15 +1,17 @@
 import datetime
 import os
+
 import joblib
-from flask import Flask, request, jsonify, render_template
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-import pandas as pd
 import numpy as np
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, accuracy_score
+import pandas as pd
+from flask import Flask, request, jsonify, render_template
 from sklearn import preprocessing
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, accuracy_score
+from sklearn.model_selection import train_test_split
 
 from db import insert
+from validator import RsForm
 
 app = Flask(__name__)
 
@@ -257,45 +259,51 @@ def predict_api():
     Rs_Plan = request_data["Rs_Plan"]
     Tool = request_data["Tool"]
 
-    X_COLUMS = ['Task_Type', 'Brand', 'Subject', 'Unit', 'Language_Pair', 'Tool', 'Rs_Plan',
-                'unified_task_amount', 'DateStamp_base_2022', 'Duration', 'RS_Month', 'RS_M_Day', 'Hour']
-    X_test = np.array([[le.fit_transform([Task_Type]).shape[0], le.fit_transform([Brand]).shape[0],
-                        le.fit_transform([Subject]).shape[0],
-                        le.fit_transform([Unit]).shape[0], le.fit_transform([Language_Pair]).shape[0],
-                        le.fit_transform([Tool]).shape[0], le.fit_transform([Rs_Plan]).shape[0],
-                        unified_task_amount, dateStamp_base, duration, rs_month, rs_m_day, hour]])
+    form = RsForm(request.form)
+    # form = ValidateForm(request.form)
 
-    # PREDICTION OF SUCCESS OR FAIL
-    y_pred = pickeld_model.predict(X_test)
-    print("Prediction>>>>>>", y_pred)
+    if form.validate():
+        X_COLUMS = ['Task_Type', 'Brand', 'Subject', 'Unit', 'Language_Pair', 'Tool', 'Rs_Plan',
+                    'unified_task_amount', 'DateStamp_base_2022', 'Duration', 'RS_Month', 'RS_M_Day', 'Hour']
+        X_test = np.array([[le.fit_transform([Task_Type]).shape[0], le.fit_transform([Brand]).shape[0],
+                            le.fit_transform([Subject]).shape[0],
+                            le.fit_transform([Unit]).shape[0], le.fit_transform([Language_Pair]).shape[0],
+                            le.fit_transform([Tool]).shape[0], le.fit_transform([Rs_Plan]).shape[0],
+                            unified_task_amount, dateStamp_base, duration, rs_month, rs_m_day, hour]])
 
-    score = pickeld_model.score(X_test, y_pred)
+        # PREDICTION OF SUCCESS OR FAIL
+        y_pred = pickeld_model.predict(X_test)
+        print("Prediction>>>>>>", y_pred)
 
-    # PERCENTAGE DATA SUCCESS
-    percentage = pickeld_model.predict_proba(X_test[:1])
-    print("Percentage>>>>>>", percentage)
+        score = pickeld_model.score(X_test, y_pred)
 
-    # IMPORTANCE COLUMN
-    Importance = pickeld_model.feature_importances_
+        # PERCENTAGE DATA SUCCESS
+        percentage = pickeld_model.predict_proba(X_test[:1])
+        print("Percentage>>>>>>", percentage)
 
-    columns = X_COLUMS[0]
-    i = 0
+        # IMPORTANCE COLUMN
+        Importance = pickeld_model.feature_importances_
 
-    while i < len(columns):
-        print(f" the importance of feature '{columns[i]}' is {round(Importance[i] * 100, 2)}%.")
-        i += 1
+        columns = X_COLUMS[0]
+        i = 0
 
-    if y_pred == 1:
-        Pred = (f"Task For Brand {Brand} Will Be Success")
+        while i < len(columns):
+            print(f" the importance of feature '{columns[i]}' is {round(Importance[i] * 100, 2)}%.")
+            i += 1
+
+        if y_pred == 1:
+            Pred = (f"Task For Brand {Brand} Will Be Success")
+        else:
+            Pred = (f"Task For Brand {Brand} Will Be Failed")
+        stastic = {
+            "Prediction": Pred,
+            "Fail_Percentage": (f"{round(percentage[0][0] * 100, 2)}%"),
+            "Success_Percentage": (f"{round(percentage[0][1] * 100, 2)}%"),
+            "Prediction_Score": int(y_pred)
+        }
+        return jsonify(stastic)
     else:
-        Pred = (f"Task For Brand {Brand} Will Be Failed")
-    stastic = {
-        "Prediction": Pred,
-        "Fail_Percentage": (f"{round(percentage[0][0] * 100, 2)}%"),
-        "Success_Percentage": (f"{round(percentage[0][1] * 100, 2)}%"),
-        "Prediction_Score": int(y_pred)
-    }
-    return jsonify(stastic)
+        return form.errors
 
 
 if __name__ == '__main__':
