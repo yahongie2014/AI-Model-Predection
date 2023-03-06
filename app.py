@@ -9,8 +9,9 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, accuracy_score
 from sklearn.model_selection import train_test_split
 
-from db import insert
 from validator import RsForm
+
+from db import insert
 
 app = Flask(__name__)
 
@@ -236,6 +237,7 @@ def train():
 # After Train And Post by Api Request
 @app.route('/api/predict', methods=['POST', 'GET'])
 def predict_api():
+
     with open(path, 'rb') as file:
         pickeld_model = joblib.load(file)
 
