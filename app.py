@@ -1,6 +1,5 @@
 import datetime
 import os
-
 import joblib
 import numpy as np
 import pandas as pd
@@ -242,6 +241,7 @@ def predict_api():
 
     # ['Task_Type', 'Brand', 'Account', 'Subject', 'Unit', 'Language_Pair', 'Tool', 'Rs_Plan',
     #          'unified_task_amount', 'DateStamp_base_2022', 'Duration', 'RS_Month', 'RS_M_Day', 'Hour']
+
     request_data = request.form
     le = preprocessing.LabelEncoder()
 
@@ -260,7 +260,6 @@ def predict_api():
     Tool = request_data["Tool"]
 
     form = RsForm(request.form)
-    # form = ValidateForm(request.form)
 
     if form.validate():
         X_COLUMS = ['Task_Type', 'Brand', 'Subject', 'Unit', 'Language_Pair', 'Tool', 'Rs_Plan',
@@ -301,9 +300,9 @@ def predict_api():
             "Success_Percentage": (f"{round(percentage[0][1] * 100, 2)}%"),
             "Prediction_Score": int(y_pred)
         }
-        return jsonify(stastic)
+        return jsonify(success=True, data=stastic)
     else:
-        return form.errors
+        return jsonify(success=False, errors=form.errors)
 
 
 if __name__ == '__main__':
