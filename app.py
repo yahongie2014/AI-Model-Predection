@@ -287,7 +287,6 @@ def predict_api():
 
         columns = X_COLUMS[0]
         i = 0
-
         while i < len(columns):
             print(f" the importance of feature '{columns[i]}' is {round(Importance[i] * 100, 2)}%.")
             i += 1
