@@ -1,4 +1,4 @@
 # AI MODLE PREDECTION
 
 # URL Test Live :
-https://coder79.pythonanywhere.com/
+http://18.235.248.239
