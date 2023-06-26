@@ -5,19 +5,45 @@ import numpy as np
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
 from sklearn import preprocessing
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, accuracy_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
-
-from validator import RsForm
-
-from db import insert
+import pickle
+from validator import RsForm, ScoreForm, ProfitabilityForm, FeedForm, DelayForm
 
 app = Flask(__name__)
 
-path = 'C://Users//ahmed.saeed//Desktop//FlaskApiRS//trainIncorta.pkl'
-csv_path = 'C://Users//ahmed.saeed//Desktop//FlaskApiRS//RsIncorta.csv'
-multi_csv_path = 'C:\\Users\\ahmed.saeed\\Desktop\\FlaskApiRS\\csv'
+# path = '//var//www/html//models//trainIncorta.pkl'
+# code_path = '//var//www/html//models//scoree.sav'
+# csv_path = '//var//www/html//models//RsIncorta.csv'
+# csv_path_files = 'var\\www\\html\\csv'
+# prof_dict = '//var//www/html//models//dictionaries_profitability.sav'
+# feed_dict = '//var//www/html//models//dictionaries_feedback.sav'
+# rf_model_prof = '//var//www/html//models//rf_model_fitted_profitability.sav'
+# rf_model_fitted_Feedback = '//var//www/html//models//rf_model_fitted_Feedback.sav'
+# delay_dict = '//var//www/html//models//dictionaries_delay.sav'
+# rf_model_fitted_Delay = '//var//www/html//models//rf_model_fitted_Delay.sav'
+
+original_path = 'D:\Python Script\AI PythonScipt'
+csv_path = os.path.join(original_path, 'models\RsIncorta.csv')
+path = os.path.join(original_path, 'models\\trainIncorta.pkl')
+code_path = os.path.join(original_path, 'models\scoree.sav')
+prof_dict = os.path.join(original_path, 'models\dictionaries_profitability.sav')
+feed_dict = os.path.join(original_path, 'models\dictionaries_feedback.sav')
+delay_dict = os.path.join(original_path, 'models\dictionaries_delay.sav')
+rf_model_prof = os.path.join(original_path, 'models\\rf_model_fitted_profitability.sav')
+rf_model_fitted_Feedback = os.path.join(original_path, 'models\\rf_model_fitted_Feedback.sav')
+rf_model_fitted_Delay = os.path.join(original_path, 'models\\rf_model_fitted_Delay.sav')
+
+
+def define_dictionary(key, Dictionary):
+    for key in Dictionary:
+        value = Dictionary[key]
+        return key
+
+
+def define_dictonary_value(key, Dictionary):
+    return Dictionary.get(key)
 
 
 # Return View With Parameters
@@ -88,90 +114,6 @@ def predict():
                                                f"{round(percentage[0][1] * 100, 2)}%")))
 
 
-# Train Modle and Save In DB
-@app.route('/save_db', methods=['GET'])
-def dynamicDb():
-    df_raw = []
-
-    files = [os.path.join(multi_csv_path, f) for f in os.listdir(multi_csv_path) if
-             os.path.isfile(os.path.join(multi_csv_path, f))]
-    for x in files:
-        df_raw = pd.read_csv(x, sep=',',
-                             encoding='unicode_escape',
-                             low_memory=False)
-        df_raw.head(10)
-        df_raw.columns = df_raw.columns.str.replace(' ', '_')
-        df_raw.info()
-        sum(df_raw.duplicated())
-        df_raw.isnull().all()
-        df_raw.isnull().sum()
-        df1 = df_raw.dropna(subset=['Rs_Id',
-                                    'Task_Type',
-                                    'Brand',
-                                    'Account',
-                                    'unified_task_amount',
-                                    'Unit',
-                                    'Subject',
-                                    'Tool',
-                                    'Rs_Plan',
-                                    'RS_Month',
-                                    'RS_M_Day',
-                                    'Hour',
-                                    'Rs_WeekDay',
-                                    'count_of_Resource',
-                                    'Language_Pair'], how='any')
-        df1
-        label_encoder = preprocessing.LabelEncoder()
-        df1["Brand"] = label_encoder.fit_transform(df1["Brand"])
-        df1["Account"] = label_encoder.fit_transform(df1["Account"])
-        df1["Unit"] = label_encoder.fit_transform(df1["Unit"])
-        df1["Task_Type"] = label_encoder.fit_transform(df1["Task_Type"])
-        df1["Subject"] = label_encoder.fit_transform(df1["Subject"])
-        df1["Tool"] = label_encoder.fit_transform(df1["Tool"])
-        df1["Rs_Plan"] = label_encoder.fit_transform(df1["Rs_Plan"])
-        df1["Rs_WeekDay"] = label_encoder.fit_transform(df1["Rs_WeekDay"])
-        df1["Language_Pair"] = label_encoder.fit_transform(df1["Language_Pair"])
-
-        df1["Brand"] = pd.Categorical(df1["Brand"])
-        df1["Account"] = pd.Categorical(df1["Account"])
-        df1["Unit"] = pd.Categorical(df1["Unit"])
-        df1["Task_Type"] = pd.Categorical(df1["Task_Type"])
-        df1["Subject"] = pd.Categorical(df1["Subject"])
-        df1["Tool"] = pd.Categorical(df1["Tool"])
-        df1["Rs_Plan"] = pd.Categorical(df1["Rs_Plan"])
-        df1["RS_Month"] = pd.Categorical(df1["RS_Month"])
-        df1["RS_M_Day"] = pd.Categorical(df1["RS_M_Day"])
-        df1["Hour"] = pd.Categorical(df1["Hour"])
-        df1["Rs_WeekDay"] = pd.Categorical(df1["Rs_WeekDay"])
-        df1["Language_Pair"] = pd.Categorical(df1["Language_Pair"])
-        X = df1[
-            ['Task_Type', 'Brand', 'unified_task_amount', 'DateStamp_base_2022', 'Duration', 'Unit', 'Subject', 'Tool',
-             'Rs_Plan', 'RS_Month', 'RS_M_Day', 'Hour', 'Language_Pair', 'Rs_WeekDay']]
-        y = np.array(df1["RS_Success"]).astype(int)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=44)
-        rf_model = RandomForestRegressor(n_estimators=50, max_features="auto", random_state=44)
-        rf_model.fit(X_train, y_train)
-        y_pred = rf_model.predict(X_test)
-        meanAbsolute = mean_absolute_error(y_test, y_pred)
-        meanSquared = mean_squared_error(y_test, y_pred)
-        meanRoot = np.sqrt(mean_squared_error(y_test, y_pred))
-        r2Score = r2_score(y_test, y_pred)
-        sql = "INSERT INTO train_model(mean_absolute, mean_squared, root_mean ,filename,trained) VALUES (%s, %s,%s,%s,%s)"
-        val = (meanAbsolute, meanSquared, meanRoot, x, 1)
-        insert(sql, val)
-    stastic = [
-        {
-            'Mean Absolute Error': meanAbsolute,
-            'Mean Squared Error': meanSquared,
-            'Root Mean Squared Error': meanRoot,
-            'R2 Score': r2Score,
-            'path': files
-        }
-    ]
-
-    return jsonify(stastic)
-
-
 # Train Model And Generate PKLE
 @app.route('/train', methods=['GET'])
 def train():
@@ -237,7 +179,6 @@ def train():
 # After Train And Post by Api Request
 @app.route('/api/predict', methods=['POST', 'GET'])
 def predict_api():
-
     with open(path, 'rb') as file:
         pickeld_model = joblib.load(file)
 
@@ -297,8 +238,8 @@ def predict_api():
             Pred = (f"Task For Brand {Brand} Will Be Failed")
         stastic = {
             "Prediction": Pred,
-            "Fail_Percentage": (f"{round(percentage[0][0] * 100, 2)}%"),
-            "Success_Percentage": (f"{round(percentage[0][1] * 100, 2)}%"),
+            "Fail_Percentage": (f"{round(percentage[0][0] * 100, 2)}"),
+            "Success_Percentage": (f"{round(percentage[0][1] * 100, 2)}"),
             "Prediction_Score": int(y_pred)
         }
         return jsonify(success=True, data=stastic)
@@ -306,5 +247,231 @@ def predict_api():
         return jsonify(success=False, errors=form.errors)
 
 
+@app.route('/api/checkScore', methods=['POST', 'GET'])
+def checkScore():
+    pickeld_model = pickle.load(open(code_path, 'rb'))
+    request_data = request.form
+    Vendor_types_name = request_data["Vendor_types_name"]
+    total_gross_amount_Main_currency = request_data['total_gross_amount_Main_currency']
+    Count_Tasks = request_data['Count_Tasks']
+    diff_Due_task = request_data['diff_Due_task']
+    cost_day = request_data['cost_day']
+    task_amount_days = request_data['task_amount_days']
+
+    form = ScoreForm(request_data)
+
+    if form.validate():
+        if (Vendor_types_name == 'Freelancer'):
+            code = 1
+        else:
+            code = 0
+
+        anomaly_inputs = np.array(
+            [[code, total_gross_amount_Main_currency, Count_Tasks,
+              diff_Due_task, task_amount_days,
+              cost_day]], dtype=float)
+        anomaly = pickeld_model.predict(anomaly_inputs)
+        anomaly_scores = pickeld_model.decision_function(anomaly_inputs)
+        fraud = np.where((anomaly < 0), 1, 0)
+        stastic = {
+            "score": anomaly_scores.tolist()[0],
+            "fraud": fraud.tolist()[0],
+
+        }
+        return jsonify(success=True, data=stastic)
+    else:
+        return jsonify(success=False, errors=form.errors)
+
+
+@app.route('/api/profitability', methods=['POST', 'GET'])
+def profitability():
+    prof_dictionary = pickle.load(open(prof_dict, 'rb'))
+
+    PMS = prof_dictionary['PM']
+    Brands = prof_dictionary['Brand']
+    Accounts = prof_dictionary['Account']
+    Job_types = prof_dictionary['Job_type']
+    Language_Pairs = prof_dictionary['Language_Pair']
+    Subjects = prof_dictionary['Subject']
+    Units = prof_dictionary['Unit']
+    profitability = prof_dictionary['profitability']
+
+    prof_model = pickle.load(open(rf_model_prof, 'rb'))
+
+    request_data = request.form
+    Brand = request_data["Brand"]
+    Unit = request_data['Unit']
+    Job_type = request_data['Job_type']
+    Subject = request_data['Subject']
+    Language_Pair = request_data['Language_Pair']
+    Start_TimeStamp = request_data['Start_TimeStamp']
+    Price = request_data['Price']
+    Deivery_TimeStamp = request_data['Deivery_TimeStamp']
+    amount = request_data['amount']
+    Duration = request_data['Duration']
+    PM = request_data['PM']
+    Account = request_data['Account']
+
+    form = ProfitabilityForm(request_data)
+    if form.validate():
+        X_COLUMS = ['Brand', 'Unit', 'Job_type', 'Subject', 'Language_Pair', 'Start_TimeStamp',
+                    'Price', 'Deivery_TimeStamp', 'amount', 'Duration', 'PM', 'Account']
+        Requests = np.array(
+            [[define_dictionary(Brand, Brands), define_dictionary(Unit, Units), define_dictionary(Job_type, Job_types),
+              define_dictionary(Subject, Subjects), define_dictionary(Language_Pair, Language_Pairs), Start_TimeStamp,
+              Price, Deivery_TimeStamp, amount, Duration, define_dictionary(PM, PMS),
+              define_dictionary(Account, Accounts)]])
+
+        predection = prof_model.predict(Requests)
+        prob = prof_model.predict_proba(Requests)
+        dfn1 = pd.DataFrame(prob, columns=["Low", "Normal", "High"])
+
+        dfn1['y_pred'] = predection
+        dfn1['25_pred'] = np.where((dfn1['Low'] >= 0.25), 0, dfn1['y_pred'])
+
+        if (dfn1['25_pred'][0] == 0):
+            percentage = dfn1['Low'][0]
+        elif (dfn1['25_pred'][0] == 1):
+            percentage = dfn1['Normal'][0]
+        elif (dfn1['25_pred'][0] == 2):
+            percentage = dfn1['High'][0]
+
+        stastic = {
+            "profitability": define_dictonary_value(dfn1['25_pred'][0], profitability),
+            "25_pred": dfn1['25_pred'].tolist()[0],
+            "percentage": (f"{round(percentage * 100, 2)}%"),
+        }
+        return jsonify(success=True, data=stastic)
+    else:
+        return jsonify(success=False, errors=form.errors)
+
+
+@app.route('/api/feedback', methods=['POST', 'GET'])
+def feedback():
+    feed_dictionary = pickle.load(open(feed_dict, 'rb'))
+    feed_model = pickle.load(open(rf_model_fitted_Feedback, 'rb'))
+    PMS = feed_dictionary['PM']
+    Brands = feed_dictionary['Brand']
+    Accounts = feed_dictionary['Account']
+    Job_types = feed_dictionary['Job_type']
+    Language_Pairs = feed_dictionary['Language_Pair']
+    Subjects = feed_dictionary['Subject']
+    Units = feed_dictionary['Unit']
+    Delays = feed_dictionary['Delay']
+
+    request_data = request.form
+    Brand = request_data["Brand"]
+    Unit = request_data['Unit']
+    Job_type = request_data['Job_type']
+    Subject = request_data['Subject']
+    Language_Pair = request_data['Language_Pair']
+    Start_TimeStamp = request_data['Start_TimeStamp']
+    Price = request_data['Price']
+    Deivery_TimeStamp = request_data['Deivery_TimeStamp']
+    amount = request_data['amount']
+    Duration = request_data['Duration']
+    PM = request_data['PM']
+    Account = request_data['Account']
+    Delay = request_data['Delay']
+
+    form = FeedForm(request_data)
+    if form.validate():
+        X_COLUMS = ['Brand', 'Unit', 'Job_type', 'Subject', 'Delay', 'Language_Pair', 'Start_TimeStamp',
+                    'Price', 'Deivery_TimeStamp', 'amount', 'Duration', 'PM', 'Account']
+        Requests = np.array(
+            [[define_dictionary(Brand, Brands), define_dictionary(Unit, Units), define_dictionary(Job_type, Job_types),
+              define_dictionary(Subject, Subjects), define_dictionary(Delay, Delays),
+              define_dictionary(Language_Pair, Language_Pairs), Start_TimeStamp,
+              Price, Deivery_TimeStamp, amount, Duration, define_dictionary(PM, PMS),
+              define_dictionary(Account, Accounts)]])
+
+        predection = feed_model.predict(Requests)
+        prob = feed_model.predict_proba(Requests)
+
+        dfn1 = pd.DataFrame(prob, columns=['positive', 'negative'])
+        dfn1['y_pred'] = predection
+        dfn1['9_pred'] = np.where((dfn1['negative'] > 0.09), 1, 0)
+        if (dfn1['9_pred'][0] == 0):
+            stastic = {
+                "Percentage": (f"{round(dfn1['positive'].tolist()[0] * 100, 2)}%"),
+                "9_pred": dfn1['9_pred'].tolist()[0],
+                "status": "Positive",
+            }
+        else:
+            stastic = {
+                "Percentage": (f"{round(dfn1['negative'].tolist()[0] * 100, 2)}%"),
+                "9_pred": dfn1['9_pred'].tolist()[0],
+                "status": "Negative",
+            }
+
+        return jsonify(success=True, data=stastic)
+    else:
+        return jsonify(success=False, errors=form.errors)
+
+
+@app.route('/api/Delay', methods=['POST', 'GET'])
+def Delay():
+    delay_dictionary = pickle.load(open(delay_dict, 'rb'))
+    delay_model = pickle.load(open(rf_model_fitted_Delay, 'rb'))
+
+    PMS = delay_dictionary['PM']
+    Brands = delay_dictionary['Brand']
+    Accounts = delay_dictionary['Account']
+    Job_types = delay_dictionary['Job_type']
+    Language_Pairs = delay_dictionary['Language_Pair']
+    Subjects = delay_dictionary['Subject']
+    Units = delay_dictionary['Unit']
+    Delays = delay_dictionary['Delay']
+
+    request_data = request.form
+    Brand = request_data["Brand"]
+    Unit = request_data['Unit']
+    Job_type = request_data['Job_type']
+    Subject = request_data['Subject']
+    Language_Pair = request_data['Language_Pair']
+    Start_TimeStamp = request_data['Start_TimeStamp']
+    Deivery_TimeStamp = request_data['Deivery_TimeStamp']
+    amount = request_data['amount']
+    Duration = request_data['Duration']
+    PM = request_data['PM']
+    Account = request_data['Account']
+
+    form = DelayForm(request_data)
+    if form.validate():
+        X_COLUMS = ['Brand', 'Unit', 'Job_type', 'Subject', 'Language_Pair', 'Start_TimeStamp',
+                    'Deivery_TimeStamp', 'amount', 'Duration', 'PM', 'Account']
+        Requests = np.array(
+            [[define_dictionary(Brand, Brands), define_dictionary(Unit, Units), define_dictionary(Job_type, Job_types),
+              define_dictionary(Subject, Subjects),
+              define_dictionary(Language_Pair, Language_Pairs), Start_TimeStamp,
+              Deivery_TimeStamp, amount, Duration, define_dictionary(PM, PMS),
+              define_dictionary(Account, Accounts)]])
+
+        y_pred = delay_model.predict(Requests)
+        y_test = delay_model.predict(Requests)
+        prob = delay_model.predict_proba(Requests)
+
+        dfn1 = pd.DataFrame(prob, columns=["On Time", "Delayed"])
+        dfn1['y_pred'] = y_pred
+        dfn1['y_test'] = y_test
+        dfn1['32_pred'] = np.where((dfn1['Delayed'] > 0.32), 1, 0)
+
+        if (dfn1['32_pred'][0] == 1):
+            stastic = {
+                "Percentage": (f"{round(dfn1['Delayed'].tolist()[0] * 100, 2)}%"),
+                "status": define_dictonary_value(y_pred.tolist()[0], Delays),
+            }
+        else:
+            stastic = {
+                "Percentage": (f"{round(dfn1['On Time'].tolist()[0] * 100, 2)}%"),
+                "status": define_dictonary_value(y_pred.tolist()[0], Delays),
+            }
+
+        return jsonify(success=True, data=stastic)
+    else:
+        return jsonify(success=False, errors=form.errors)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+    # app.run(host='0.0.0.0')
