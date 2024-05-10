@@ -98,7 +98,7 @@
              $.ajax({
                  type: 'POST',
                  contentType: 'application/json',
-                 url: 'http://18.235.248.239/api/predict',
+                 url: 'https://18.235.248.239/api/predict',
                  data: $('form').serialize(),
                  success: function (data) {
                      document.getElementById('value').value = data.predict
