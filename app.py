@@ -9,37 +9,40 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 import pickle
-from validator import RsForm, ScoreForm, ProfitabilityForm, FeedForm, DelayForm
+from validator import RsForm, ScoreForm, ProfitabilityForm, FeedForm, DelayForm, PayoutForm
 
 app = Flask(__name__)
 
-# path = '//var//www/html//models//trainIncorta.pkl'
-# code_path = '//var//www/html//models//scoree.sav'
-# csv_path = '//var//www/html//models//RsIncorta.csv'
-# csv_path_files = 'var\\www\\html\\csv'
-# prof_dict = '//var//www/html//models//dictionaries_profitability.sav'
-# feed_dict = '//var//www/html//models//dictionaries_feedback.sav'
-# rf_model_prof = '//var//www/html//models//rf_model_fitted_profitability.sav'
-# rf_model_fitted_Feedback = '//var//www/html//models//rf_model_fitted_Feedback.sav'
-# delay_dict = '//var//www/html//models//dictionaries_delay.sav'
-# rf_model_fitted_Delay = '//var//www/html//models//rf_model_fitted_Delay.sav'
-
-original_path = 'D:\Python Script\AI PythonScipt'
-csv_path = os.path.join(original_path, 'models\RsIncorta.csv')
-path = os.path.join(original_path, 'models\\trainIncorta.pkl')
-code_path = os.path.join(original_path, 'models\scoree.sav')
-prof_dict = os.path.join(original_path, 'models\dictionaries_profitability.sav')
-feed_dict = os.path.join(original_path, 'models\dictionaries_feedback.sav')
-delay_dict = os.path.join(original_path, 'models\dictionaries_delay.sav')
-rf_model_prof = os.path.join(original_path, 'models\\rf_model_fitted_profitability.sav')
-rf_model_fitted_Feedback = os.path.join(original_path, 'models\\rf_model_fitted_Feedback.sav')
-rf_model_fitted_Delay = os.path.join(original_path, 'models\\rf_model_fitted_Delay.sav')
+path = '//var//www/html//models//trainIncorta.pkl'
+code_path = '//var//www/html//models//scoree.sav'
+csv_path = '//var//www/html//models//RsIncorta.csv'
+csv_path_files = 'var\\www\\html\\csv'
+prof_dict = '//var//www/html//models//dictionaries_profitability.sav'
+feed_dict = '//var//www/html//models//dictionaries_feedback.sav'
+rf_model_prof = '//var//www/html//models//rf_model_fitted_profitability.sav'
+rf_model_fitted_Feedback = '//var//www/html//models//rf_model_fitted_Feedback.sav'
+delay_dict = '//var//www/html//models//dictionaries_delay.sav'
+rf_model_fitted_Delay = '//var//www/html//models//rf_model_fitted_Delay.sav'
+RF_Regressor = '//var//www/html//models//RF_Regressor.sav'
 
 
-def define_dictionary(key, Dictionary):
-    for key in Dictionary:
-        value = Dictionary[key]
-        return key
+# original_path = 'D:\Python Script\AI PythonScipt'
+# csv_path = os.path.join(original_path, 'models\RsIncorta.csv')
+# path = os.path.join(original_path, 'models\\trainIncorta.pkl')
+# code_path = os.path.join(original_path, 'models\scoree.sav')
+# prof_dict = os.path.join(original_path, 'models\dictionaries_profitability.sav')
+# feed_dict = os.path.join(original_path, 'models\dictionaries_feedback.sav')
+# delay_dict = os.path.join(original_path, 'models\dictionaries_delay.sav')
+# rf_model_prof = os.path.join(original_path, 'models\\rf_model_fitted_profitability.sav')
+# rf_model_fitted_Feedback = os.path.join(original_path, 'models\\rf_model_fitted_Feedback.sav')
+# rf_model_fitted_Delay = os.path.join(original_path, 'models\\rf_model_fitted_Delay.sav')
+# RF_Regressor = os.path.join(original_path, 'models\\RF_Regressor.sav')
+
+
+def define_dictionary(givenkey, Dictionary):
+    for key, val in Dictionary.items():
+        if (val == givenkey):
+            return key
 
 
 def define_dictonary_value(key, Dictionary):
@@ -375,6 +378,7 @@ def feedback():
     Delay = request_data['Delay']
 
     form = FeedForm(request_data)
+
     if form.validate():
         X_COLUMS = ['Brand', 'Unit', 'Job_type', 'Subject', 'Delay', 'Language_Pair', 'Start_TimeStamp',
                     'Price', 'Deivery_TimeStamp', 'amount', 'Duration', 'PM', 'Account']
@@ -459,12 +463,12 @@ def Delay():
         if (dfn1['32_pred'][0] == 1):
             stastic = {
                 "Percentage": (f"{round(dfn1['Delayed'].tolist()[0] * 100, 2)}%"),
-                "status": define_dictonary_value(y_pred.tolist()[0], Delays),
+                "status": define_dictonary_value(dfn1['32_pred'].tolist()[0], Delays),
             }
         else:
             stastic = {
                 "Percentage": (f"{round(dfn1['On Time'].tolist()[0] * 100, 2)}%"),
-                "status": define_dictonary_value(y_pred.tolist()[0], Delays),
+                "status": define_dictonary_value(dfn1['32_pred'].tolist()[0], Delays),
             }
 
         return jsonify(success=True, data=stastic)
@@ -472,6 +476,43 @@ def Delay():
         return jsonify(success=False, errors=form.errors)
 
 
+@app.route('/api/customer_payout', methods=['POST', 'GET'])
+def customer_payout():
+    Regressor_model = pickle.load(open(RF_Regressor, 'rb'))
+
+    request_data = request.form
+    account_id = request_data["account_id"]
+    issue_month = request_data['issue_month']
+    issue_day = request_data['issue_day']
+    due_month = request_data['due_month']
+    due_day = request_data['due_day']
+    payment_terms = request_data['payment_terms']
+    credit_history = request_data['credit_history']
+    paid = request_data['paid']
+    invoice_amount_main_currency = request_data['invoice_amount_main_currency']
+
+    form = PayoutForm(request_data)
+    if form.validate():
+        X_COLUMS = ['Account Id', 'Issue Month', 'Issue Day', 'Due Month', 'Due Day', 'Payment Terms', 'Credit History',
+                    'Paid', 'Invoice Amount Main Currency']
+        Requests = np.array(
+            [[account_id, issue_month, issue_day, due_month, due_day, payment_terms, credit_history, paid,
+              invoice_amount_main_currency]])
+
+        predicted = Regressor_model.predict(Requests)
+
+        # Accuracy = r2_score(Requests, predicted)
+
+        stastic = {
+            "Days": predicted[0],
+            # "Accuracy": Accuracy
+        }
+
+        return jsonify(success=True, data=stastic)
+    else:
+        return jsonify(success=False, errors=form.errors)
+
+
 if __name__ == '__main__':
-    #app.run(debug=True)
+    # app.run(debug=True)
     app.run(host='0.0.0.0')
