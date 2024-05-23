@@ -13,19 +13,38 @@ from validator import RsForm, ScoreForm, ProfitabilityForm, FeedForm, DelayForm,
 
 app = Flask(__name__)
 
-path = '//var//www/html//models//trainIncorta.pkl'
-code_path = '//var//www/html//models//scoree.sav'
-csv_path = '//var//www/html//models//RsIncorta.csv'
-csv_path_files = 'var\\www\\html\\csv'
-prof_dict = '//var//www/html//models//dictionaries_profitability.sav'
-feed_dict = '//var//www/html//models//dictionaries_feedback.sav'
-rf_model_prof = '//var//www/html//models//rf_model_fitted_profitability.sav'
-rf_model_fitted_Feedback = '//var//www/html//models//rf_model_fitted_Feedback.sav'
-delay_dict = '//var//www/html//models//dictionaries_delay.sav'
-rf_model_fitted_Delay = '//var//www/html//models//rf_model_fitted_Delay.sav'
-RF_Regressor = '//var//www/html//models//RF_Regressor.sav'
 
+# Linux Path
+# -------------------------------------------------------------------------
+# path = '//var//www/html//models//trainIncorta.pkl'
+# code_path = '//var//www/html//models//scoree.sav'
+# csv_path = '//var//www/html//models//RsIncorta.csv'
+# csv_path_files = 'var\\www\\html\\csv'
+# prof_dict = '//var//www/html//models//dictionaries_profitability.sav'
+# feed_dict = '//var//www/html//models//dictionaries_feedback.sav'
+# rf_model_prof = '//var//www/html//models//rf_model_fitted_profitability.sav'
+# rf_model_fitted_Feedback = '//var//www/html//models//rf_model_fitted_Feedback.sav'
+# delay_dict = '//var//www/html//models//dictionaries_delay.sav'
+# rf_model_fitted_Delay = '//var//www/html//models//rf_model_fitted_Delay.sav'
+# RF_Regressor = '//var//www/html//models//RF_Regressor.sav'
+# -------------------------------------------------------------------------
 
+# Mac Path
+# -------------------------------------------------------------------------
+prof_dict = '//Users//apple//Desktop//AI-Model-Predection//models//dictionaries_profitability.sav'
+feed_dict = '//Users//apple//Desktop//AI-Model-Predection//models//dictionaries_feedback.sav'
+delay_dict = '//Users//apple//Desktop//AI-Model-Predection//models//dictionaries_delay.sav'
+path = '//Users//apple//Desktop//AI-Model-Predection//models//trainIncorta.pkl'
+code_path = '//Users//apple//Desktop//AI-Model-Predection//models//scoree.sav'
+csv_path = '//Users//apple//Desktop//AI-Model-Predection//RsIncorta.csv'
+rf_model_prof = '//Users//apple//Desktop//AI-Model-Predection//models//rf_model_fitted_profitability.sav'
+rf_model_fitted_Feedback = '//Users//apple//Desktop//AI-Model-Predection//models//rf_model_fitted_Feedback.sav'
+rf_model_fitted_Delay = '//Users//apple//Desktop//AI-Model-Predection//models//rf_model_fitted_Delaxy.sav'
+RF_Regressor = '//Users//apple//Desktop//AI-Model-Predection//models//RF_Regressor.sav'
+# -------------------------------------------------------------------------
+
+# Windows Path
+# -----------------------------------------------------------------------
 # original_path = 'D:\Python Script\AI PythonScipt'
 # csv_path = os.path.join(original_path, 'models\RsIncorta.csv')
 # path = os.path.join(original_path, 'models\\trainIncorta.pkl')
@@ -37,6 +56,7 @@ RF_Regressor = '//var//www/html//models//RF_Regressor.sav'
 # rf_model_fitted_Feedback = os.path.join(original_path, 'models\\rf_model_fitted_Feedback.sav')
 # rf_model_fitted_Delay = os.path.join(original_path, 'models\\rf_model_fitted_Delay.sav')
 # RF_Regressor = os.path.join(original_path, 'models\\RF_Regressor.sav')
+# -------------------------------------------------------------------------
 
 
 def define_dictionary(givenkey, Dictionary):
@@ -514,5 +534,5 @@ def customer_payout():
 
 
 if __name__ == '__main__':
-    # app.run(debug=True)
-    app.run(host='0.0.0.0')
+     app.run(debug=True)
+    #app.run(host='0.0.0.0')
