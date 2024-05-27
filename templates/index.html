@@ -254,6 +254,51 @@
         </div>
     </form>
 
+    <h2>Customer Payout Form</h2>
+    <form id="payout-form" class="row g-3" method="post">
+        <div class="form-group">
+            <label for="account_id">Account ID:</label>
+            <input type="text" class="form-control" id="account_id" name="account_id" required>
+        </div>
+        <div class="form-group">
+            <label for="issue_month">Issue Month:</label>
+            <input type="text" class="form-control" id="issue_month" name="issue_month" required>
+        </div>
+        <div class="form-group">
+            <label for="issue_day">Issue Day:</label>
+            <input type="text" class="form-control" id="issue_day" name="issue_day" required>
+        </div>
+        <div class="form-group">
+            <label for="due_month">Due Month:</label>
+            <input type="text" class="form-control" id="due_month" name="due_month" required>
+        </div>
+        <div class="form-group">
+            <label for="due_day">Due Day:</label>
+            <input type="text" class="form-control" id="due_day" name="due_day" required>
+        </div>
+        <div class="form-group">
+            <label for="payment_terms">Payment Terms:</label>
+            <input type="text" class="form-control" id="payment_terms" name="payment_terms" required>
+        </div>
+        <div class="form-group">
+            <label for="credit_history">Credit History:</label>
+            <input type="text" class="form-control" id="credit_history" name="credit_history" required>
+        </div>
+        <div class="form-group">
+            <label for="paid">Paid:</label>
+            <input type="text" class="form-control" id="paid" name="paid" required>
+        </div>
+        <div class="form-group">
+            <label for="invoice_amount_main_currency">Invoice Amount (Main Currency):</label>
+            <input type="number" class="form-control" id="invoice_amount_main_currency" name="invoice_amount_main_currency" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <div class="col-12 mt-3">
+            <div id="payout_text" class="alert alert-info" role="alert"></div>
+            <input type="hidden" id="value" name="value" disabled aria-label="Prediction Value">
+        </div>
+    </form>
+
 
 </div>
 
@@ -351,6 +396,31 @@
                 },
                 error: function () {
                     $('#delay_text').text('An error occurred while processing your request.');
+                }
+            });
+        });
+
+        $('#payout-form').on('submit', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '/api/customer_payout',
+                data: $(this).serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        var data = response.data;
+                        $('#value').val(data['success']);
+                        $('#payout_text').html(
+                            'Status: ' + data.success + '<br>' +
+                            'Days: ' + data.Days
+                        );
+                        console.log(data);
+                    } else {
+                        console.log('Error:', response.errors);
+                    }
+                },
+                error: function () {
+                    console.log('An error occurred while processing your request.');
                 }
             });
         });
