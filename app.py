@@ -15,33 +15,33 @@ app = Flask(__name__)
 
 # Linux Path
 # -------------------------------------------------------------------------
-prof_dict_path = '//var//www/html//models//dictionaries_profitability.sav'
-feed_dict_path = '//var//www/html//models//dictionaries_feedback.sav'
-delay_dict_path = '//var//www/html//models//dictionaries_delay.sav'
-path = '//var//www/html//models//trainIncorta.pkl'
-code_path = '//var//www/html//models//scoree.sav'
-rf_model_prof_path = '//var//www/html//models//rf_model_fitted_profitability.sav'
-rf_model_fitted_Feedback_path = '//var//www/html//models//rf_model_fitted_Feedback.sav'
-rf_model_fitted_Delay_path = '//var//www/html//models//rf_model_fitted_Delay.sav'
-RF_Regressor_path = '//var//www/html//models//RF_Regressor.sav'
-csv_path = '//var//www/html//models//RsIncorta.csv'
-csv_path_files = 'var\\www\\html\\csv'
+# prof_dict_path = '//var//www/html//models//dictionaries_profitability.sav'
+# feed_dict_path = '//var//www/html//models//dictionaries_feedback.sav'
+# delay_dict_path = '//var//www/html//models//dictionaries_delay.sav'
+# path = '//var//www/html//models//trainIncorta.pkl'
+# code_path = '//var//www/html//models//scoree.sav'
+# rf_model_prof_path = '//var//www/html//models//rf_model_fitted_profitability.sav'
+# rf_model_fitted_Feedback_path = '//var//www/html//models//rf_model_fitted_Feedback.sav'
+# rf_model_fitted_Delay_path = '//var//www/html//models//rf_model_fitted_Delay.sav'
+# RF_Regressor_path = '//var//www/html//models//RF_Regressor.sav'
+# csv_path = '//var//www/html//models//RsIncorta.csv'
+# csv_path_files = 'var\\www\\html\\csv'
 # -------------------------------------------------------------------------
 
 
 
 # Mac Path
 # -------------------------------------------------------------------------
-# prof_dict_path = 'models/dictionaries_profitability.sav'
-# feed_dict_path = 'models/dictionaries_feedback.sav'
-# delay_dict_path = 'models/dictionaries_delay.sav'
-# path = 'models/trainIncorta.pkl'
-# code_path = 'models/scoree.sav'
-# rf_model_prof_path = 'models/rf_model_fitted_profitability.sav'
-# rf_model_fitted_Feedback_path = 'models/rf_model_fitted_Feedback.sav'
-# rf_model_fitted_Delay_path = 'models/rf_model_fitted_Delay.sav'
-# RF_Regressor_path = 'models/RF_Regressor.sav'
-# csv_path = 'models//RsIncorta.csv'
+prof_dict_path = 'models/dictionaries_profitability.sav'
+feed_dict_path = 'models/dictionaries_feedback.sav'
+delay_dict_path = 'models/dictionaries_delay.sav'
+path = 'models/trainIncorta.pkl'
+code_path = 'models/scoree.sav'
+rf_model_prof_path = 'models/rf_model_fitted_profitability.sav'
+rf_model_fitted_Feedback_path = 'models/rf_model_fitted_Feedback.sav'
+rf_model_fitted_Delay_path = 'models/rf_model_fitted_Delay.sav'
+RF_Regressor_path = 'models/RF_Regressor.sav'
+csv_path = 'models//RsIncorta.csv'
 # -------------------------------------------------------------------------
 
 # Windows Path
