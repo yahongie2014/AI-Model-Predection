@@ -13,38 +13,39 @@ from validator import RsForm, ScoreForm, ProfitabilityForm, FeedForm, DelayForm,
 
 app = Flask(__name__)
 
-
 # Linux Path
 # -------------------------------------------------------------------------
-# path = '//var//www/html//models//trainIncorta.pkl'
-# code_path = '//var//www/html//models//scoree.sav'
-# csv_path = '//var//www/html//models//RsIncorta.csv'
-# csv_path_files = 'var\\www\\html\\csv'
-# prof_dict = '//var//www/html//models//dictionaries_profitability.sav'
-# feed_dict = '//var//www/html//models//dictionaries_feedback.sav'
-# rf_model_prof = '//var//www/html//models//rf_model_fitted_profitability.sav'
-# rf_model_fitted_Feedback = '//var//www/html//models//rf_model_fitted_Feedback.sav'
-# delay_dict = '//var//www/html//models//dictionaries_delay.sav'
-# rf_model_fitted_Delay = '//var//www/html//models//rf_model_fitted_Delay.sav'
-# RF_Regressor = '//var//www/html//models//RF_Regressor.sav'
+prof_dict_path = '//var//www/html//models//dictionaries_profitability.sav'
+feed_dict_path = '//var//www/html//models//dictionaries_feedback.sav'
+delay_dict_path = '//var//www/html//models//dictionaries_delay.sav'
+path = '//var//www/html//models//trainIncorta.pkl'
+code_path = '//var//www/html//models//scoree.sav'
+rf_model_prof_path = '//var//www/html//models//rf_model_fitted_profitability.sav'
+rf_model_fitted_Feedback_path = '//var//www/html//models//rf_model_fitted_Feedback.sav'
+rf_model_fitted_Delay_path = '//var//www/html//models//rf_model_fitted_Delay.sav'
+RF_Regressor_path = '//var//www/html//models//RF_Regressor.sav'
+csv_path = '//var//www/html//models//RsIncorta.csv'
+csv_path_files = 'var\\www\\html\\csv'
 # -------------------------------------------------------------------------
+
+
 
 # Mac Path
 # -------------------------------------------------------------------------
-prof_dict = '//Users//apple//Desktop//AI-Model-Predection//models//dictionaries_profitability.sav'
-feed_dict = '//Users//apple//Desktop//AI-Model-Predection//models//dictionaries_feedback.sav'
-delay_dict = '//Users//apple//Desktop//AI-Model-Predection//models//dictionaries_delay.sav'
-path = '//Users//apple//Desktop//AI-Model-Predection//models//trainIncorta.pkl'
-code_path = '//Users//apple//Desktop//AI-Model-Predection//models//scoree.sav'
-csv_path = '//Users//apple//Desktop//AI-Model-Predection//RsIncorta.csv'
-rf_model_prof = '//Users//apple//Desktop//AI-Model-Predection//models//rf_model_fitted_profitability.sav'
-rf_model_fitted_Feedback = '//Users//apple//Desktop//AI-Model-Predection//models//rf_model_fitted_Feedback.sav'
-rf_model_fitted_Delay = '//Users//apple//Desktop//AI-Model-Predection//models//rf_model_fitted_Delaxy.sav'
-RF_Regressor = '//Users//apple//Desktop//AI-Model-Predection//models//RF_Regressor.sav'
+# prof_dict_path = 'models/dictionaries_profitability.sav'
+# feed_dict_path = 'models/dictionaries_feedback.sav'
+# delay_dict_path = 'models/dictionaries_delay.sav'
+# path = 'models/trainIncorta.pkl'
+# code_path = 'models/scoree.sav'
+# rf_model_prof_path = 'models/rf_model_fitted_profitability.sav'
+# rf_model_fitted_Feedback_path = 'models/rf_model_fitted_Feedback.sav'
+# rf_model_fitted_Delay_path = 'models/rf_model_fitted_Delay.sav'
+# RF_Regressor_path = 'models/RF_Regressor.sav'
+# csv_path = 'models//RsIncorta.csv'
 # -------------------------------------------------------------------------
 
 # Windows Path
-# -----------------------------------------------------------------------
+# -------------------------------------------------------------------------
 # original_path = 'D:\Python Script\AI PythonScipt'
 # csv_path = os.path.join(original_path, 'models\RsIncorta.csv')
 # path = os.path.join(original_path, 'models\\trainIncorta.pkl')
@@ -59,10 +60,8 @@ RF_Regressor = '//Users//apple//Desktop//AI-Model-Predection//models//RF_Regress
 # -------------------------------------------------------------------------
 
 
-def define_dictionary(givenkey, Dictionary):
-    for key, val in Dictionary.items():
-        if (val == givenkey):
-            return key
+def define_dictionary(value, dictionary):
+    return dictionary.get(value, -1)
 
 
 def define_dictonary_value(key, Dictionary):
@@ -308,7 +307,7 @@ def checkScore():
 
 @app.route('/api/profitability', methods=['POST', 'GET'])
 def profitability():
-    prof_dictionary = pickle.load(open(prof_dict, 'rb'))
+    prof_dictionary = pickle.load(open(prof_dict_path, 'rb'))
 
     PMS = prof_dictionary['PM']
     Brands = prof_dictionary['Brand']
@@ -319,7 +318,14 @@ def profitability():
     Units = prof_dictionary['Unit']
     profitability = prof_dictionary['profitability']
 
-    prof_model = pickle.load(open(rf_model_prof, 'rb'))
+    try:
+        with open(rf_model_prof_path, 'rb') as model_file:
+            prof_model = pickle.load(model_file)
+        print("Model loaded successfully.")
+    except FileNotFoundError:
+        print(f"File not found: {rf_model_prof_path}")
+    except Exception as e:
+        print(f"An error occurred while loading the model: {e}")
 
     request_data = request.form
     Brand = request_data["Brand"]
@@ -344,6 +350,7 @@ def profitability():
               define_dictionary(Subject, Subjects), define_dictionary(Language_Pair, Language_Pairs), Start_TimeStamp,
               Price, Deivery_TimeStamp, amount, Duration, define_dictionary(PM, PMS),
               define_dictionary(Account, Accounts)]])
+
 
         predection = prof_model.predict(Requests)
         prob = prof_model.predict_proba(Requests)
@@ -371,8 +378,8 @@ def profitability():
 
 @app.route('/api/feedback', methods=['POST', 'GET'])
 def feedback():
-    feed_dictionary = pickle.load(open(feed_dict, 'rb'))
-    feed_model = pickle.load(open(rf_model_fitted_Feedback, 'rb'))
+    feed_dictionary = pickle.load(open(feed_dict_path, 'rb'))
+    feed_model = pickle.load(open(rf_model_fitted_Feedback_path, 'rb'))
     PMS = feed_dictionary['PM']
     Brands = feed_dictionary['Brand']
     Accounts = feed_dictionary['Account']
@@ -435,8 +442,8 @@ def feedback():
 
 @app.route('/api/Delay', methods=['POST', 'GET'])
 def Delay():
-    delay_dictionary = pickle.load(open(delay_dict, 'rb'))
-    delay_model = pickle.load(open(rf_model_fitted_Delay, 'rb'))
+    delay_dictionary = pickle.load(open(delay_dict_path, 'rb'))
+    delay_model = pickle.load(open(rf_model_fitted_Delay_path, 'rb'))
 
     PMS = delay_dictionary['PM']
     Brands = delay_dictionary['Brand']
@@ -498,7 +505,7 @@ def Delay():
 
 @app.route('/api/customer_payout', methods=['POST', 'GET'])
 def customer_payout():
-    Regressor_model = pickle.load(open(RF_Regressor, 'rb'))
+    Regressor_model = pickle.load(open(RF_Regressor_path, 'rb'))
 
     request_data = request.form
     account_id = request_data["account_id"]
@@ -534,5 +541,5 @@ def customer_payout():
 
 
 if __name__ == '__main__':
-     app.run(debug=True)
+    app.run(debug=True)
     #app.run(host='0.0.0.0')
