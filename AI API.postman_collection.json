@@ -1,0 +1,526 @@
+{
+	"info": {
+		"_postman_id": "52a834a7-59fd-4894-a131-8ec25d221fc5",
+		"name": "AI API",
+		"description": "Main Server IP : [Main Script](http://18.235.248.239/)\n\nApi Usage : [Api Link](http://18.235.248.239/api/)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2836787",
+		"_collection_link": "https://www.postman.com/back-bone/workspace/db05af3a-489f-4f2f-bf90-cb519b0e4641/collection/2836787-52a834a7-59fd-4894-a131-8ec25d221fc5?action=share&source=collection_link&creator=2836787"
+	},
+	"item": [
+		{
+			"name": "checkScore",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "Vendor_types_name",
+							"value": "Freelancer",
+							"type": "text"
+						},
+						{
+							"key": "total_gross_amount_Main_currency",
+							"value": "27.19",
+							"type": "text"
+						},
+						{
+							"key": "Count_Tasks",
+							"value": "2",
+							"type": "text"
+						},
+						{
+							"key": "diff_Due_task",
+							"value": "15",
+							"type": "text"
+						},
+						{
+							"key": "cost_day",
+							"value": "54.59839357",
+							"type": "text"
+						},
+						{
+							"key": "task_amount_days",
+							"value": "0.498",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{pyhtonlive}}/api/checkScore",
+					"host": [
+						"{{pyhtonlive}}"
+					],
+					"path": [
+						"api",
+						"checkScore"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Predict RS Success",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "unified_task_amount",
+							"value": "22.3",
+							"type": "text"
+						},
+						{
+							"key": "dateStamp_base",
+							"value": "212",
+							"type": "text"
+						},
+						{
+							"key": "duration",
+							"value": "21",
+							"type": "text"
+						},
+						{
+							"key": "rs_month",
+							"value": "2",
+							"type": "text"
+						},
+						{
+							"key": "rs_m_day",
+							"value": "12",
+							"type": "text"
+						},
+						{
+							"key": "hour",
+							"value": "43",
+							"type": "text"
+						},
+						{
+							"key": "Task_Type",
+							"value": "2",
+							"type": "text"
+						},
+						{
+							"key": "Brand",
+							"value": "12",
+							"type": "text"
+						},
+						{
+							"key": "Subject",
+							"value": "21",
+							"type": "text"
+						},
+						{
+							"key": "Language_Pair",
+							"value": "21",
+							"type": "text"
+						},
+						{
+							"key": "Unit",
+							"value": "21",
+							"type": "text"
+						},
+						{
+							"key": "Rs_Plan",
+							"value": "21",
+							"type": "text"
+						},
+						{
+							"key": "Tool",
+							"value": "21",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{pyhtonlive}}/api/predict",
+					"host": [
+						"{{pyhtonlive}}"
+					],
+					"path": [
+						"api",
+						"predict"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Profitability",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "Brand",
+							"value": "Torjoman",
+							"type": "text"
+						},
+						{
+							"key": "Unit",
+							"value": "Hour",
+							"type": "text"
+						},
+						{
+							"key": "Job_type",
+							"value": "Translation & Proofreading",
+							"type": "text"
+						},
+						{
+							"key": "Subject",
+							"value": "Marketing & Advertising",
+							"type": "text"
+						},
+						{
+							"key": "Language_Pair",
+							"value": "English_Indonesian",
+							"type": "text"
+						},
+						{
+							"key": "Start_TimeStamp",
+							"value": "1182.42",
+							"type": "text"
+						},
+						{
+							"key": "Price",
+							"value": "0.46",
+							"type": "text"
+						},
+						{
+							"key": "Deivery_TimeStamp",
+							"value": "1183.54",
+							"type": "text"
+						},
+						{
+							"key": "amount",
+							"value": "107.14",
+							"type": "text"
+						},
+						{
+							"key": "Duration",
+							"value": "32",
+							"type": "text"
+						},
+						{
+							"key": "PM",
+							"value": "Mariam Hassan",
+							"type": "text"
+						},
+						{
+							"key": "Account",
+							"value": "Transline International GmbH - Bosch Automotive",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{pyhtonlive}}/api/profitability",
+					"host": [
+						"{{pyhtonlive}}"
+					],
+					"path": [
+						"api",
+						"profitability"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Feedback",
+			"protocolProfileBehavior": {
+				"strictSSL": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "Brand",
+							"value": "Torjoman",
+							"type": "text"
+						},
+						{
+							"key": "Unit",
+							"value": "Hour",
+							"type": "text"
+						},
+						{
+							"key": "Job_type",
+							"value": "Proofreading",
+							"type": "text"
+						},
+						{
+							"key": "Subject",
+							"value": "General",
+							"type": "text"
+						},
+						{
+							"key": "Language_Pair",
+							"value": "English_Zulu",
+							"type": "text"
+						},
+						{
+							"key": "Start_TimeStamp",
+							"value": "1182.39",
+							"type": "text"
+						},
+						{
+							"key": "Price",
+							"value": "0",
+							"type": "text"
+						},
+						{
+							"key": "Deivery_TimeStamp",
+							"value": "1182.5",
+							"type": "text"
+						},
+						{
+							"key": "amount",
+							"value": "0.25",
+							"type": "text"
+						},
+						{
+							"key": "Duration",
+							"value": "0.11",
+							"type": "text"
+						},
+						{
+							"key": "PM",
+							"value": "Sally Sami",
+							"type": "text"
+						},
+						{
+							"key": "Account",
+							"value": "RWS Life sciences",
+							"type": "text"
+						},
+						{
+							"key": "Delay",
+							"value": "On Time",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{pyhtonlive}}/api/feedback",
+					"host": [
+						"{{pyhtonlive}}"
+					],
+					"path": [
+						"api",
+						"feedback"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delay",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "Brand",
+							"value": "Torjoman",
+							"type": "text"
+						},
+						{
+							"key": "Unit",
+							"value": "Hour",
+							"type": "text"
+						},
+						{
+							"key": "Job_type",
+							"value": "Translation & Proofreading",
+							"type": "text"
+						},
+						{
+							"key": "Subject",
+							"value": "Marketing & Advertising",
+							"type": "text"
+						},
+						{
+							"key": "Language_Pair",
+							"value": "English_Indonesian",
+							"type": "text"
+						},
+						{
+							"key": "Start_TimeStamp",
+							"value": "1182.42",
+							"type": "text"
+						},
+						{
+							"key": "Deivery_TimeStamp",
+							"value": "1183.54",
+							"type": "text"
+						},
+						{
+							"key": "amount",
+							"value": "107.14",
+							"type": "text"
+						},
+						{
+							"key": "Duration",
+							"value": "32",
+							"type": "text"
+						},
+						{
+							"key": "PM",
+							"value": "Mariam Hassan",
+							"type": "text"
+						},
+						{
+							"key": "Account",
+							"value": "Transline International GmbH - Bosch Automotive",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{pyhtonlive}}/api/Delay",
+					"host": [
+						"{{pyhtonlive}}"
+					],
+					"path": [
+						"api",
+						"Delay"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RS Train Model",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "18.235.248.239/train",
+					"host": [
+						"18",
+						"235",
+						"248",
+						"239"
+					],
+					"path": [
+						"train"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Customer Payout",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "account_id",
+							"value": "383",
+							"type": "text"
+						},
+						{
+							"key": "issue_month",
+							"value": "12",
+							"type": "text"
+						},
+						{
+							"key": "issue_day",
+							"value": "3",
+							"type": "text"
+						},
+						{
+							"key": "due_month",
+							"value": "7",
+							"type": "text"
+						},
+						{
+							"key": "due_day",
+							"value": "12",
+							"type": "text"
+						},
+						{
+							"key": "payment_terms",
+							"value": "60",
+							"description": "payment term account",
+							"type": "text"
+						},
+						{
+							"key": "credit_history",
+							"value": "6792",
+							"description": "account days count",
+							"type": "text"
+						},
+						{
+							"key": "paid",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "invoice_amount_main_currency",
+							"value": "2400.41",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{pyhtonlive}}/api/customer_payout",
+					"host": [
+						"{{pyhtonlive}}"
+					],
+					"path": [
+						"api",
+						"customer_payout"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
