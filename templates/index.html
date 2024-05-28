@@ -311,7 +311,7 @@
             e.preventDefault();
             $.ajax({
                 type: 'POST',
-                url: window.location +'api/predict',
+                url:  'http://18.235.248.239/api/predict',
                 data: $(this).serialize(),
                 success: function (response) {
                     var data = response.data;
@@ -330,7 +330,7 @@
             e.preventDefault();
             $.ajax({
                 type: 'POST',
-                url: '/api/profitability',
+                url: 'http://18.235.248.239/api/profitability',
                 data: $(this).serialize(),
                 success: function (response) {
                     if (response.success) {
@@ -355,7 +355,7 @@
             e.preventDefault();
             $.ajax({
                 type: 'POST',
-                url: '/api/feedback',
+                url: 'http://18.235.248.239/api/feedback',
                 data: $(this).serialize(),
                 success: function (response) {
                     if (response.success) {
@@ -380,7 +380,7 @@
             e.preventDefault();
             $.ajax({
                 type: 'POST',
-                url: '/api/Delay',
+                url: 'http://18.235.248.239/api/Delay',
                 data: $(this).serialize(),
                 success: function (response) {
                     if (response.success) {
@@ -404,7 +404,7 @@
             e.preventDefault();
             $.ajax({
                 type: 'POST',
-                url: '/api/customer_payout',
+                url: 'http://18.235.248.239/api/customer_payout',
                 data: $(this).serialize(),
                 success: function (response) {
                     if (response.success) {
