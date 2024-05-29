@@ -64,8 +64,8 @@ def define_dictionary(value, dictionary):
     return dictionary.get(value, -1)
 
 
-def define_dictonary_value(key, Dictionary):
-    return Dictionary.get(key)
+def define_dictonary_value(key, dictionary):
+    return dictionary.get(key)
 
 
 # Return View With Parameters
@@ -318,6 +318,7 @@ def profitability():
     Units = prof_dictionary['Unit']
     profitability = prof_dictionary['profitability']
 
+
     try:
         with open(rf_model_prof_path, 'rb') as model_file:
             prof_model = pickle.load(model_file)
@@ -366,8 +367,15 @@ def profitability():
         elif (dfn1['25_pred'][0] == 2):
             percentage = dfn1['High'][0]
 
+        if (dfn1['25_pred'][0] == profitability['Low']):
+            profitability_var = 'Low'
+        elif (dfn1['25_pred'][0] == profitability['Normal']):
+            profitability_var = 'Normal'
+        elif (dfn1['25_pred'][0] == profitability['High']):
+            profitability_var = 'High'
+
         stastic = {
-            "profitability": define_dictonary_value(dfn1['25_pred'][0], profitability),
+            "profitability": profitability_var,
             "25_pred": dfn1['25_pred'].tolist()[0],
             "percentage": (f"{round(percentage * 100, 2)}%"),
         }
@@ -541,5 +549,5 @@ def customer_payout():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    #app.run(host='0.0.0.0')
+    #app.run(debug=True)
+    app.run(host='0.0.0.0')
