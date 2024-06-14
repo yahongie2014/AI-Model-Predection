@@ -1,9 +1,10 @@
 import datetime
+import difflib
 import os
 import joblib
 import numpy as np
 import pandas as pd
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, abort, make_response
 from sklearn import preprocessing
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, accuracy_score, confusion_matrix
@@ -15,33 +16,35 @@ app = Flask(__name__)
 
 # Linux Path
 # -------------------------------------------------------------------------
-# prof_dict_path = '//var//www/html//models//dictionaries_profitability.sav'
-# feed_dict_path = '//var//www/html//models//dictionaries_feedback.sav'
-# delay_dict_path = '//var//www/html//models//dictionaries_delay.sav'
-# path = '//var//www/html//models//trainIncorta.pkl'
-# code_path = '//var//www/html//models//scoree.sav'
-# rf_model_prof_path = '//var//www/html//models//rf_model_fitted_profitability.sav'
-# rf_model_fitted_Feedback_path = '//var//www/html//models//rf_model_fitted_Feedback.sav'
-# rf_model_fitted_Delay_path = '//var//www/html//models//rf_model_fitted_Delay.sav'
-# RF_Regressor_path = '//var//www/html//models//RF_Regressor.sav'
-# csv_path = '//var//www/html//models//RsIncorta.csv'
-# csv_path_files = 'var\\www\\html\\csv'
+main_dict_path = '//var//www/html//models//dictionaries_main.sav'
+prof_dict_path = '//var//www/html//models//dictionaries_profitability.sav'
+feed_dict_path = '//var//www/html//models//dictionaries_feedback.sav'
+delay_dict_path = '//var//www/html//models//dictionaries_delay.sav'
+path = '//var//www/html//models//trainIncorta.pkl'
+code_path = '//var//www/html//models//scoree.sav'
+rf_model_prof_path = '//var//www/html//models//rf_model_fitted_profitability.sav'
+rf_model_fitted_Feedback_path = '//var//www/html//models//rf_model_fitted_Feedback.sav'
+rf_model_fitted_Delay_path = '//var//www/html//models//rf_model_fitted_Delay.sav'
+RF_Regressor_path = '//var//www/html//models//RF_Regressor.sav'
+csv_path = '//var//www/html//models//RsIncorta.csv'
+csv_path_files = 'var\\www\\html\\csv'
 # -------------------------------------------------------------------------
 
 
 
 # Mac Path
 # -------------------------------------------------------------------------
-prof_dict_path = 'models/dictionaries_profitability.sav'
-feed_dict_path = 'models/dictionaries_feedback.sav'
-delay_dict_path = 'models/dictionaries_delay.sav'
-path = 'models/trainIncorta.pkl'
-code_path = 'models/scoree.sav'
-rf_model_prof_path = 'models/rf_model_fitted_profitability.sav'
-rf_model_fitted_Feedback_path = 'models/rf_model_fitted_Feedback.sav'
-rf_model_fitted_Delay_path = 'models/rf_model_fitted_Delay.sav'
-RF_Regressor_path = 'models/RF_Regressor.sav'
-csv_path = 'models//RsIncorta.csv'
+# main_dict_path = 'models/dictionaries_main.sav'
+# prof_dict_path = 'models/dictionaries_profitability.sav'
+# feed_dict_path = 'models/dictionaries_feedback.sav'
+# delay_dict_path = 'models/dictionaries_delay.sav'
+# path = 'models/trainIncorta.pkl'
+# code_path = 'models/scoree.sav'
+# rf_model_prof_path = 'models/rf_model_fitted_profitability.sav'
+# rf_model_fitted_Feedback_path = 'models/rf_model_fitted_Feedback.sav'
+# rf_model_fitted_Delay_path = 'models/rf_model_fitted_Delay.sav'
+# RF_Regressor_path = 'models/RF_Regressor.sav'
+# csv_path = 'models//RsIncorta.csv'
 # -------------------------------------------------------------------------
 
 # Windows Path
@@ -59,13 +62,23 @@ csv_path = 'models//RsIncorta.csv'
 # RF_Regressor = os.path.join(original_path, 'models\\RF_Regressor.sav')
 # -------------------------------------------------------------------------
 
-
 def define_dictionary(value, dictionary):
-    return dictionary.get(value, -1)
+    lower_case_value = value.lower()
+    lower_case_dict = {k.lower(): v for k, v in dictionary.items()}
+
+    if lower_case_value in lower_case_dict:
+        return lower_case_dict[lower_case_value]
+    else:
+        suggestions = difflib.get_close_matches(lower_case_value, lower_case_dict.keys())
+        if suggestions:
+            suggestion_str = ', '.join(suggestions)
+            return f"Error: The key '{value}' was not found in the dictionary. Did you mean: {suggestion_str}?"
+        else:
+            return f"Error: The key '{value}' was not found in the dictionary and no similar keys were found."
 
 
-def define_dictonary_value(key, Dictionary):
-    return Dictionary.get(key)
+def define_dictonary_value(key, dictionary):
+    return dictionary.get(key)
 
 
 # Return View With Parameters
@@ -318,6 +331,7 @@ def profitability():
     Units = prof_dictionary['Unit']
     profitability = prof_dictionary['profitability']
 
+
     try:
         with open(rf_model_prof_path, 'rb') as model_file:
             prof_model = pickle.load(model_file)
@@ -345,12 +359,17 @@ def profitability():
     if form.validate():
         X_COLUMS = ['Brand', 'Unit', 'Job_type', 'Subject', 'Language_Pair', 'Start_TimeStamp',
                     'Price', 'Deivery_TimeStamp', 'amount', 'Duration', 'PM', 'Account']
-        Requests = np.array(
-            [[define_dictionary(Brand, Brands), define_dictionary(Unit, Units), define_dictionary(Job_type, Job_types),
+        Requests = [define_dictionary(Brand, Brands), define_dictionary(Unit, Units), define_dictionary(Job_type, Job_types),
               define_dictionary(Subject, Subjects), define_dictionary(Language_Pair, Language_Pairs), Start_TimeStamp,
               Price, Deivery_TimeStamp, amount, Duration, define_dictionary(PM, PMS),
-              define_dictionary(Account, Accounts)]])
+              define_dictionary(Account, Accounts)]
 
+
+        for req in Requests:
+            if isinstance (req, str) and req.startswith ("Error"):
+                return make_response(jsonify(success=False, data=req),500)
+
+        Requests = np.array ([Requests])
 
         predection = prof_model.predict(Requests)
         prob = prof_model.predict_proba(Requests)
@@ -366,8 +385,15 @@ def profitability():
         elif (dfn1['25_pred'][0] == 2):
             percentage = dfn1['High'][0]
 
+        if (dfn1['25_pred'][0] == profitability['Low']):
+            profitability_var = 'Low'
+        elif (dfn1['25_pred'][0] == profitability['Normal']):
+            profitability_var = 'Normal'
+        elif (dfn1['25_pred'][0] == profitability['High']):
+            profitability_var = 'High'
+
         stastic = {
-            "profitability": define_dictonary_value(dfn1['25_pred'][0], profitability),
+            "profitability": profitability_var,
             "25_pred": dfn1['25_pred'].tolist()[0],
             "percentage": (f"{round(percentage * 100, 2)}%"),
         }
@@ -387,7 +413,6 @@ def feedback():
     Language_Pairs = feed_dictionary['Language_Pair']
     Subjects = feed_dictionary['Subject']
     Units = feed_dictionary['Unit']
-    Delays = feed_dictionary['Delay']
 
     request_data = request.form
     Brand = request_data["Brand"]
@@ -402,22 +427,27 @@ def feedback():
     Duration = request_data['Duration']
     PM = request_data['PM']
     Account = request_data['Account']
-    Delay = request_data['Delay']
 
     form = FeedForm(request_data)
 
     if form.validate():
-        X_COLUMS = ['Brand', 'Unit', 'Job_type', 'Subject', 'Delay', 'Language_Pair', 'Start_TimeStamp',
+        X_COLUMS = ['Brand', 'Unit', 'Job_type', 'Subject', 'Language_Pair', 'Start_TimeStamp',
                     'Price', 'Deivery_TimeStamp', 'amount', 'Duration', 'PM', 'Account']
-        Requests = np.array(
-            [[define_dictionary(Brand, Brands), define_dictionary(Unit, Units), define_dictionary(Job_type, Job_types),
-              define_dictionary(Subject, Subjects), define_dictionary(Delay, Delays),
-              define_dictionary(Language_Pair, Language_Pairs), Start_TimeStamp,
+        Requests = [define_dictionary(Brand, Brands), define_dictionary(Unit, Units), define_dictionary(Job_type, Job_types),
+              define_dictionary(Subject, Subjects),define_dictionary(Language_Pair, Language_Pairs), Start_TimeStamp,
               Price, Deivery_TimeStamp, amount, Duration, define_dictionary(PM, PMS),
-              define_dictionary(Account, Accounts)]])
+              define_dictionary(Account, Accounts)]
+
+        for req in Requests:
+            if isinstance (req, str) and req.startswith ("Error"):
+                return make_response(jsonify(success=False, data=req),500)
+
+        Requests = np.array([Requests])
 
         predection = feed_model.predict(Requests)
         prob = feed_model.predict_proba(Requests)
+
+
 
         dfn1 = pd.DataFrame(prob, columns=['positive', 'negative'])
         dfn1['y_pred'] = predection
@@ -471,13 +501,25 @@ def Delay():
     if form.validate():
         X_COLUMS = ['Brand', 'Unit', 'Job_type', 'Subject', 'Language_Pair', 'Start_TimeStamp',
                     'Deivery_TimeStamp', 'amount', 'Duration', 'PM', 'Account']
-        Requests = np.array(
-            [[define_dictionary(Brand, Brands), define_dictionary(Unit, Units), define_dictionary(Job_type, Job_types),
-              define_dictionary(Subject, Subjects),
-              define_dictionary(Language_Pair, Language_Pairs), Start_TimeStamp,
-              Deivery_TimeStamp, amount, Duration, define_dictionary(PM, PMS),
-              define_dictionary(Account, Accounts)]])
+        Requests = [
+            define_dictionary(Brand, Brands),
+            define_dictionary(Unit, Units),
+            define_dictionary(Job_type, Job_types),
+            define_dictionary(Subject, Subjects),
+            define_dictionary(Language_Pair, Language_Pairs),
+            Start_TimeStamp,
+            Deivery_TimeStamp,
+            amount,
+            Duration,
+            define_dictionary(PM, PMS),
+            define_dictionary(Account, Accounts)
+        ]
 
+        for req in Requests:
+            if isinstance(req, str) and req.startswith("Error"):
+                return make_response(jsonify(success=False, data=req),500)
+
+        Requests = np.array([Requests])
         y_pred = delay_model.predict(Requests)
         y_test = delay_model.predict(Requests)
         prob = delay_model.predict_proba(Requests)
@@ -487,15 +529,23 @@ def Delay():
         dfn1['y_test'] = y_test
         dfn1['32_pred'] = np.where((dfn1['Delayed'] > 0.32), 1, 0)
 
+
+        if(dfn1['32_pred'].tolist()[0] == 1):
+            delaStatus = 'Delayed'
+        else:
+            delaStatus = 'On Time'
+
         if (dfn1['32_pred'][0] == 1):
             stastic = {
+                "32_pred": dfn1['32_pred'].tolist()[0],
                 "Percentage": (f"{round(dfn1['Delayed'].tolist()[0] * 100, 2)}%"),
-                "status": define_dictonary_value(dfn1['32_pred'].tolist()[0], Delays),
+                "status": 'Delayed',
             }
         else:
             stastic = {
+                "32_pred": dfn1['32_pred'].tolist()[0],
                 "Percentage": (f"{round(dfn1['On Time'].tolist()[0] * 100, 2)}%"),
-                "status": define_dictonary_value(dfn1['32_pred'].tolist()[0], Delays),
+                "status": 'On Time',
             }
 
         return jsonify(success=True, data=stastic)
@@ -540,6 +590,27 @@ def customer_payout():
         return jsonify(success=False, errors=form.errors)
 
 
+@app.route('/search', methods=['POST'])
+def search():
+    main_dictionary = pickle.load(open(main_dict_path, 'rb'))
+    search_term = request.form.get('searchTerm', '').lower()
+    search_results = []
+
+    def recursive_search(d, parent_key=''):
+        for key, value in d.items():
+            if isinstance(value, dict):
+                recursive_search(value, f'{parent_key} -> {key}' if parent_key else key)
+            else:
+                if search_term in str(key).lower() or search_term in str(value).lower():
+                    full_key = f'{parent_key} -> {key}' if parent_key else key
+                    search_results.append(f'{full_key}: {value}')
+
+    recursive_search(main_dictionary)
+
+    return jsonify({'results': search_results})
+
+
+
 if __name__ == '__main__':
-    #app.run(debug=True)
+    # app.run(debug=True)
     app.run(host='0.0.0.0')
