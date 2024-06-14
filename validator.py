@@ -69,7 +69,6 @@ class FeedForm(Form):
                                                    Length(min=1, max=100)])
     Subject = StringField('Subject', validators=[InputRequired(),
                                                  Length(min=1, max=191)])
-    Delay = StringField('Delay', validators=[InputRequired()])
 
     Language_Pair = StringField('Language_Pair', validators=[InputRequired(),
                                                              Length(min=1, max=191)])
