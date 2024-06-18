@@ -8,5 +8,5 @@ pandas
 flask_validator
 wtforms
 flask_inputs
-scikit-learn==1.2.2
+scikit-learn==1.5.0
 flask_sock
