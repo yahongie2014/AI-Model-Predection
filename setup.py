@@ -5,7 +5,7 @@ setup(
     version='1.0',
     packages=find_packages(),
     install_requires=[
-        'scikit-learn==1.2.2',
+        'scikit-learn==1.5.0',
         # Other dependencies
     ],
 )
