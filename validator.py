@@ -1,4 +1,4 @@
-from wtforms import Form, StringField, IntegerField, FloatField
+from wtforms import Form, StringField, IntegerField, FloatField, DateTimeField
 from wtforms.validators import InputRequired, Length, DataRequired
 from flask_inputs import Inputs
 
@@ -53,11 +53,14 @@ class ProfitabilityForm(Form):
     Account = StringField('Account', validators=[InputRequired(),
                                                  Length(min=1, max=191)])
 
-    Start_TimeStamp = FloatField('Start_TimeStamp', validators=[InputRequired()])
+    Start_TimeStamp = DateTimeField('Start_TimeStamp', format='%Y-%m-%d %H:%M:%S', validators=[DataRequired()])
+    Deivery_TimeStamp = DateTimeField('Deivery_TimeStamp', format='%Y-%m-%d %H:%M:%S', validators=[DataRequired()])
+
+    # Start_TimeStamp = FloatField('Start_TimeStamp', validators=[InputRequired()])
+    # Deivery_TimeStamp = FloatField('Deivery_TimeStamp', validators=[InputRequired()])
+
     Price = FloatField('Price', validators=[InputRequired()])
-    Deivery_TimeStamp = FloatField('Deivery_TimeStamp', validators=[InputRequired()])
     amount = FloatField('amount', validators=[InputRequired()])
-    Duration = FloatField('Duration', validators=[InputRequired()])
 
 
 class FeedForm(Form):
@@ -77,11 +80,10 @@ class FeedForm(Form):
     Account = StringField('Account', validators=[InputRequired(),
                                                  Length(min=1, max=191)])
 
-    Start_TimeStamp = FloatField('Start_TimeStamp', validators=[InputRequired()])
+    Start_TimeStamp = DateTimeField('Start_TimeStamp', format='%Y-%m-%d %H:%M:%S', validators=[DataRequired()])
+    Deivery_TimeStamp = DateTimeField('Deivery_TimeStamp', format='%Y-%m-%d %H:%M:%S', validators=[DataRequired()])
     Price = FloatField('Price', validators=[InputRequired()])
-    Deivery_TimeStamp = FloatField('Deivery_TimeStamp', validators=[InputRequired()])
     amount = FloatField('amount', validators=[InputRequired()])
-    Duration = FloatField('Duration', validators=[InputRequired()])
 
 
 class DelayForm(Form):
@@ -100,10 +102,9 @@ class DelayForm(Form):
     Account = StringField('Account', validators=[InputRequired(),
                                                  Length(min=1, max=191)])
 
-    Start_TimeStamp = FloatField('Start_TimeStamp', validators=[InputRequired()])
-    Deivery_TimeStamp = FloatField('Deivery_TimeStamp', validators=[InputRequired()])
+    Start_TimeStamp = DateTimeField('Start_TimeStamp', format='%Y-%m-%d %H:%M:%S', validators=[DataRequired()])
+    Deivery_TimeStamp = DateTimeField('Deivery_TimeStamp', format='%Y-%m-%d %H:%M:%S', validators=[DataRequired()])
     amount = FloatField('amount', validators=[InputRequired()])
-    Duration = FloatField('Duration', validators=[InputRequired()])
 
 
 class PayoutForm(Form):

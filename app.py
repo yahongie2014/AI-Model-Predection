@@ -1,6 +1,7 @@
 import datetime
 import difflib
 import os
+import json
 import joblib
 import numpy as np
 import pandas as pd
@@ -11,15 +12,16 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score, a
 from sklearn.model_selection import train_test_split
 import pickle
 from validator import RsForm, ScoreForm, ProfitabilityForm, FeedForm, DelayForm, PayoutForm
+from datetime import datetime as dtime
 
 app = Flask(__name__)
 
 # Linux Path
 # -------------------------------------------------------------------------
 main_dict_path = '//var//www/html//models//dictionaries_main.sav'
-prof_dict_path = '//var//www/html//models//dictionaries_profitability.sav'
-feed_dict_path = '//var//www/html//models//dictionaries_feedback.sav'
-delay_dict_path = '//var//www/html//models//dictionaries_delay.sav'
+prof_dict_path = '//var//www/html//models//dictionaries_main.sav'
+feed_dict_path = '//var//www/html//models//dictionaries_main.sav'
+delay_dict_path = '//var//www/html//models//dictionaries_main.sav'
 path = '//var//www/html//models//trainIncorta.pkl'
 code_path = '//var//www/html//models//scoree.sav'
 rf_model_prof_path = '//var//www/html//models//rf_model_fitted_profitability.sav'
@@ -28,6 +30,8 @@ rf_model_fitted_Delay_path = '//var//www/html//models//rf_model_fitted_Delay.sav
 RF_Regressor_path = '//var//www/html//models//RF_Regressor.sav'
 csv_path = '//var//www/html//models//RsIncorta.csv'
 csv_path_files = 'var\\www\\html\\csv'
+json_file_path= '//var//www/html//main_dictionary.json'
+output_file_path = '//var//www/html//models//dictionaries_main.sav'
 # -------------------------------------------------------------------------
 
 
@@ -35,9 +39,9 @@ csv_path_files = 'var\\www\\html\\csv'
 # Mac Path
 # -------------------------------------------------------------------------
 # main_dict_path = 'models/dictionaries_main.sav'
-# prof_dict_path = 'models/dictionaries_profitability.sav'
-# feed_dict_path = 'models/dictionaries_feedback.sav'
-# delay_dict_path = 'models/dictionaries_delay.sav'
+# prof_dict_path = 'models/dictionaries_main.sav'
+# feed_dict_path = 'models/dictionaries_main.sav'
+# delay_dict_path = 'models/dictionaries_main.sav'
 # path = 'models/trainIncorta.pkl'
 # code_path = 'models/scoree.sav'
 # rf_model_prof_path = 'models/rf_model_fitted_profitability.sav'
@@ -45,6 +49,8 @@ csv_path_files = 'var\\www\\html\\csv'
 # rf_model_fitted_Delay_path = 'models/rf_model_fitted_Delay.sav'
 # RF_Regressor_path = 'models/RF_Regressor.sav'
 # csv_path = 'models//RsIncorta.csv'
+# json_file_path= 'GenerateModel/main_dictionary.json'
+# output_file_path = 'dictionaries_main.sav'
 # -------------------------------------------------------------------------
 
 # Windows Path
@@ -347,21 +353,33 @@ def profitability():
     Job_type = request_data['Job_type']
     Subject = request_data['Subject']
     Language_Pair = request_data['Language_Pair']
-    Start_TimeStamp = request_data['Start_TimeStamp']
+    Start_TimeStamp = dtime.strptime(request_data['Start_TimeStamp'], '%Y-%m-%d %H:%M:%S')
+    Deivery_TimeStamp = dtime.strptime(request_data['Deivery_TimeStamp'], '%Y-%m-%d %H:%M:%S')
     Price = request_data['Price']
-    Deivery_TimeStamp = request_data['Deivery_TimeStamp']
     amount = request_data['amount']
-    Duration = request_data['Duration']
     PM = request_data['PM']
     Account = request_data['Account']
+
+    base_date = dtime.strptime('2020-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+    difference_start = Start_TimeStamp - base_date
+    difference_delivery = Deivery_TimeStamp - base_date
+    total_days_start = difference_start.days
+    fractional_days_start = difference_start.seconds / (24 * 3600)
+
+    total_days_delivery = difference_delivery.days
+    fractional_days_delivery = difference_delivery.seconds / (24 * 3600)
+
+    total_days_with_fraction_start = total_days_start + fractional_days_start
+    total_days_with_fraction_delivery = total_days_delivery + fractional_days_delivery
+    duration_final = total_days_with_fraction_delivery - total_days_with_fraction_start
 
     form = ProfitabilityForm(request_data)
     if form.validate():
         X_COLUMS = ['Brand', 'Unit', 'Job_type', 'Subject', 'Language_Pair', 'Start_TimeStamp',
                     'Price', 'Deivery_TimeStamp', 'amount', 'Duration', 'PM', 'Account']
         Requests = [define_dictionary(Brand, Brands), define_dictionary(Unit, Units), define_dictionary(Job_type, Job_types),
-              define_dictionary(Subject, Subjects), define_dictionary(Language_Pair, Language_Pairs), Start_TimeStamp,
-              Price, Deivery_TimeStamp, amount, Duration, define_dictionary(PM, PMS),
+              define_dictionary(Subject, Subjects), define_dictionary(Language_Pair, Language_Pairs), (f'{total_days_with_fraction_start:.2f}'),
+              Price, (f'{total_days_with_fraction_delivery:.2f}'), amount, duration_final, define_dictionary(PM, PMS),
               define_dictionary(Account, Accounts)]
 
 
@@ -420,22 +438,34 @@ def feedback():
     Job_type = request_data['Job_type']
     Subject = request_data['Subject']
     Language_Pair = request_data['Language_Pair']
-    Start_TimeStamp = request_data['Start_TimeStamp']
+    Start_TimeStamp = dtime.strptime(request_data['Start_TimeStamp'], '%Y-%m-%d %H:%M:%S')
+    Deivery_TimeStamp = dtime.strptime(request_data['Deivery_TimeStamp'], '%Y-%m-%d %H:%M:%S')
     Price = request_data['Price']
-    Deivery_TimeStamp = request_data['Deivery_TimeStamp']
     amount = request_data['amount']
-    Duration = request_data['Duration']
     PM = request_data['PM']
     Account = request_data['Account']
 
     form = FeedForm(request_data)
 
+    base_date = dtime.strptime('2020-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+    difference_start = Start_TimeStamp - base_date
+    difference_delivery = Deivery_TimeStamp - base_date
+    total_days_start = difference_start.days
+    fractional_days_start = difference_start.seconds / (24 * 3600)
+
+    total_days_delivery = difference_delivery.days
+    fractional_days_delivery = difference_delivery.seconds / (24 * 3600)
+
+    total_days_with_fraction_start = total_days_start + fractional_days_start
+    total_days_with_fraction_delivery = total_days_delivery + fractional_days_delivery
+    duration_final = total_days_with_fraction_delivery - total_days_with_fraction_start
+
     if form.validate():
         X_COLUMS = ['Brand', 'Unit', 'Job_type', 'Subject', 'Language_Pair', 'Start_TimeStamp',
                     'Price', 'Deivery_TimeStamp', 'amount', 'Duration', 'PM', 'Account']
         Requests = [define_dictionary(Brand, Brands), define_dictionary(Unit, Units), define_dictionary(Job_type, Job_types),
-              define_dictionary(Subject, Subjects),define_dictionary(Language_Pair, Language_Pairs), Start_TimeStamp,
-              Price, Deivery_TimeStamp, amount, Duration, define_dictionary(PM, PMS),
+              define_dictionary(Subject, Subjects),define_dictionary(Language_Pair, Language_Pairs), total_days_with_fraction_start,
+              Price, total_days_with_fraction_delivery, amount, duration_final, define_dictionary(PM, PMS),
               define_dictionary(Account, Accounts)]
 
         for req in Requests:
@@ -490,14 +520,27 @@ def Delay():
     Job_type = request_data['Job_type']
     Subject = request_data['Subject']
     Language_Pair = request_data['Language_Pair']
-    Start_TimeStamp = request_data['Start_TimeStamp']
-    Deivery_TimeStamp = request_data['Deivery_TimeStamp']
+    Start_TimeStamp = dtime.strptime(request_data['Start_TimeStamp'], '%Y-%m-%d %H:%M:%S')
+    Deivery_TimeStamp = dtime.strptime(request_data['Deivery_TimeStamp'], '%Y-%m-%d %H:%M:%S')
     amount = request_data['amount']
-    Duration = request_data['Duration']
     PM = request_data['PM']
     Account = request_data['Account']
 
     form = DelayForm(request_data)
+
+    base_date = dtime.strptime('2020-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+    difference_start = Start_TimeStamp - base_date
+    difference_delivery = Deivery_TimeStamp - base_date
+    total_days_start = difference_start.days
+    fractional_days_start = difference_start.seconds / (24 * 3600)
+
+    total_days_delivery = difference_delivery.days
+    fractional_days_delivery = difference_delivery.seconds / (24 * 3600)
+
+    total_days_with_fraction_start = total_days_start + fractional_days_start
+    total_days_with_fraction_delivery = total_days_delivery + fractional_days_delivery
+    duration_final = total_days_with_fraction_delivery - total_days_with_fraction_start
+
     if form.validate():
         X_COLUMS = ['Brand', 'Unit', 'Job_type', 'Subject', 'Language_Pair', 'Start_TimeStamp',
                     'Deivery_TimeStamp', 'amount', 'Duration', 'PM', 'Account']
@@ -507,10 +550,10 @@ def Delay():
             define_dictionary(Job_type, Job_types),
             define_dictionary(Subject, Subjects),
             define_dictionary(Language_Pair, Language_Pairs),
-            Start_TimeStamp,
-            Deivery_TimeStamp,
+            total_days_with_fraction_start,
+            total_days_with_fraction_delivery,
             amount,
-            Duration,
+            duration_final,
             define_dictionary(PM, PMS),
             define_dictionary(Account, Accounts)
         ]
@@ -609,6 +652,30 @@ def search():
 
     return jsonify({'results': search_results})
 
+
+@app.route('/api/generateModel', methods=['POST'])
+def json_to_model():
+    try:
+        method = 'pickle'
+
+        if not os.path.exists(json_file_path):
+            return jsonify ({"error": "JSON file not found"}), 404
+
+        with open(json_file_path, 'r') as file:
+            model_data = json.load(file)
+
+        if method == 'pickle':
+            with open(output_file_path, 'wb') as file:
+                pickle.dump (model_data, file)
+        elif method == 'joblib':
+            joblib.dump(model_data, output_file_path)
+        else:
+            return jsonify({"error": "Invalid method. Choose 'pickle' or 'joblib'."}), 400
+
+        return jsonify({"message": "Model saved successfully!", "path": output_file_path}), 200
+
+    except Exception as e:
+        return jsonify({"error": str (e)}), 500
 
 
 if __name__ == '__main__':
